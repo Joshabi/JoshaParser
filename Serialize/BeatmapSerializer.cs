@@ -15,7 +15,7 @@ public class BeatmapSerializer : JsonConverter<DifficultyData>
     {
         DifficultyData data = new();
         JObject obj = JObject.Load(reader);
-        data.OriginalJson = (JObject)obj.DeepClone();
+        data.RawJSON = obj.ToString(Formatting.Indented);
 
         JToken version = obj["version"] ?? obj["_version"] ?? "";
         if (string.IsNullOrEmpty(version.ToString())) return null;

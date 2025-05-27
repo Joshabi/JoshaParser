@@ -13,7 +13,7 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
     {
         SongInfo data = new();
         JObject obj = JObject.Load(reader);
-        data.OriginalJson = (JObject)obj.DeepClone();
+        data.RawJSON = obj.ToString(Formatting.Indented);
 
         JToken version = obj["version"] ?? obj["_version"] ?? "";
         if (string.IsNullOrEmpty(version.ToString())) return null;
@@ -24,7 +24,7 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
             case BeatmapInfoRevision.V200 or BeatmapInfoRevision.V210:
                 DeserializeV2(obj, ref data);
                 break;
-            case BeatmapInfoRevision.V400:
+            case BeatmapInfoRevision.V400 or BeatmapInfoRevision.V401:
                 DeserializeV4(obj, ref data);
                 break;
             default: Console.WriteLine("Unsupported Version"); return null;
@@ -78,7 +78,7 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
         }
     }
 
-    /// <summary> Handles Deserializing V4 Info Data</summary>
+    /// <summary> Handles Deserializing V4 and V4.0.1 Info Data</summary>
     private static void DeserializeV4(JObject jObject, ref SongInfo data)
     {
         List<DifficultyInfo> difficultyBeatmaps = jObject["difficultyBeatmaps"]?.ToObject<List<DifficultyInfo>>() ?? [];

@@ -31,7 +31,7 @@ public static class DifficultyV2Parser
     /// <summary> Serializes patchable map data from DifficultyData </summary>
     public static JObject Serialize(DifficultyData data)
     {
-        JObject obj = data.OriginalJson != null ? (JObject)data.OriginalJson.DeepClone() : [];
+        JObject obj = JObject.Parse(data.RawJSON ?? "{}");
         obj["_version"] = data.Version.ToVersionString();
 
         var orderedObjects = data.Bombs.Cast<BeatObject>().Concat(data.Notes).OrderBy(obj => obj.B);
@@ -69,7 +69,7 @@ public static class DifficultyV3Parser
     /// <summary> Serializes patchable map data from DifficultyData </summary>
     public static JObject Serialize(DifficultyData data)
     {
-        JObject obj = data.OriginalJson != null ? (JObject)data.OriginalJson.DeepClone() : [];
+        JObject obj = JObject.Parse(data.RawJSON ?? "{}");
         obj["version"] = data.Version.ToVersionString();
         obj["colorNotes"] = new JArray(data.Notes.Select(NoteV3Parser.Serialize));
         obj["bombNotes"] = new JArray(data.Bombs.Select(BombV3Parser.Serialize));
@@ -107,7 +107,7 @@ public static class DifficultyV4Parser
     /// <summary> Serializes patchable map data from DifficultyData </summary>
     public static JObject Serialize(DifficultyData data)
     {
-        JObject obj = data.OriginalJson != null ? (JObject)data.OriginalJson.DeepClone() : [];
+        JObject obj = JObject.Parse(data.RawJSON ?? "{}");
         obj["version"] = data.Version.ToVersionString();
 
         var colorNotes = new JArray();

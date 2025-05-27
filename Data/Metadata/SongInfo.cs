@@ -21,7 +21,7 @@ public class SongInfo
     public List<string> EnvironmentNames { get; set; } = [];
     public List<DifficultyInfo> DifficultyBeatmaps { get; set; } = [];
 
-    public JObject? OriginalJson { get; set; }
+    public string? RawJSON { get; set; }
 
     public override string ToString()
     {
@@ -108,6 +108,7 @@ public enum BeatmapInfoRevision
     V200 = 1,
     V210 = 2,
     V400 = 3,
+    V401 = 4
 }
 
 /// <summary> Difficulty ID Enum </summary>

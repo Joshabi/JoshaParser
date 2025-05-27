@@ -14,7 +14,7 @@ public class DifficultyData
     public List<Arc> Arcs { get; set; } = [];
     public List<Chain> Chains { get; set; } = [];
 
-    public JObject? OriginalJson { get; set; }
+    public string? RawJSON { get; set; }
 
     public override string ToString()
     {
