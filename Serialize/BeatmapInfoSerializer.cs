@@ -30,6 +30,13 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
             default: Console.WriteLine("Unsupported Version"); return null;
         }
 
+        // CustomData: Contributors handling (To my knowledge not version specific?)
+        JToken? customDataToken = obj["_customData"];
+        if (customDataToken != null && customDataToken.Type == JTokenType.Object)
+            if (customDataToken["_contributors"] is JArray contributorsArray)
+                data.Contributors = contributorsArray.ToObject<List<ContributorInfo>>(serializer) ?? [];
+        data.Contributors ??= [];
+
         return data;
     }
 

@@ -2,6 +2,30 @@
 
 namespace JoshaParser.Utils;
 
+/// <summary> Utilities class for generic BeatmapData </summary>
+public static class BeatmapUtils
+{
+    /// <summary> Calculates the Jump Distance (JD) based on BPM, NJS, and Offset </summary>
+    public static float CalculateJD(float bpm, float njs, float njsoffset)
+    {
+        float hjd = 4;
+        float bps = 60 / bpm;
+        if (njs <= 0.01) njs = 10;
+        while (njs * bps * hjd > 17.999) hjd /= 2;
+        hjd += njsoffset;
+        if (hjd < 0.25f) hjd = 0.25f;
+        return njs * bps * hjd * 2;
+    }
+
+    /// <summary> Calculates the Reaction Time (RT) based on JD and NJS </summary>
+    public static float CalculateReactionTime(float njs, float jd)
+    {
+        if (Math.Abs(njs) < 0.001f)
+            return 0f;
+        return (jd / (njs * 2) * 1000);
+    }
+}
+
 /// <summary> Extensions class for generic BeatmapData </summary>
 public static class BeatmapExtensions {
 

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace JoshaParser.Data.Metadata;
 
@@ -20,6 +21,7 @@ public class SongInfo
     public string AllDirectionsEnvironmentName { get; set; } = string.Empty;
     public List<string> EnvironmentNames { get; set; } = [];
     public List<DifficultyInfo> DifficultyBeatmaps { get; set; } = [];
+    public List<ContributorInfo> Contributors { get; set; } = [];
 
     public string? RawJSON { get; set; }
 
@@ -99,6 +101,14 @@ public class DifficultyInfo
             $"Beatmap Data Filename:       {BeatmapDataFilename}\n" +
             $"Lightshow Data Filename:     {LightshowDataFilename}";
     }
+}
+
+/// <summary> Represents CustomData for Contributor Metadata </summary>
+public class ContributorInfo
+{
+    [JsonProperty("_name")] public string Name { get; set; } = "";
+    [JsonProperty("_role")] public string Role { get; set; } = "";
+    [JsonProperty("_iconPath")] public string IconPath { get; set; } = "";
 }
 
 /// <summary> Represents version of Song Info Data </summary>
