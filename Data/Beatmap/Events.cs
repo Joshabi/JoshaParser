@@ -11,8 +11,8 @@ public class BPMEvent
     public override string ToString() => $"Beat: {B}, Value: {M}";
 }
 
-/// <summary> Legacy V2 Event used for parsing old BPM Events </summary>
-public class EventV2
+/// <summary> Legacy V2 Event </summary>
+public class LegacyEvent
 {
     [JsonProperty("_time")] public float Beat { get; protected set; }
     [JsonProperty("_type")] public int Type { get; protected set; }

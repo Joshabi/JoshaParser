@@ -43,7 +43,7 @@ public static class NoteV3Parser
             Y = (int)(nToken["y"] ?? 0),
             C = (int)(nToken["c"] ?? 0),
             D = (CutDirection)(int)(nToken["d"] ?? 0),
-            A = (float)(nToken["a"] ?? 0),
+            A = (int)(nToken["a"] ?? 0),
         };
     }
 
@@ -69,17 +69,19 @@ public static class NoteV4Parser
         Note note = new()
         {
             B = (float)(nToken["b"] ?? 0),
-            R = (int)(nToken["r"] ?? 0),
-            I = (int)(nToken["i"] ?? 0),
+            R = (int)(nToken["r"] ?? 0)
         };
-        JToken? data = dToken[note.I];
+
+        int noteIndex = (int)(nToken["i"] ?? 0);
+        JToken? data = dToken[noteIndex];
         if (data is not null) {
             note.X = (int)(data["x"] ?? 0);
             note.Y = (int)(data["y"] ?? 0);
             note.C = (int)(data["c"] ?? 0);
             note.D = (CutDirection)(int)(data["d"] ?? 0);
-            note.A = (float)(data["a"] ?? 0);
+            note.A = (int)(data["a"] ?? 0);
         }
+
         return note;
     }
 
@@ -88,9 +90,9 @@ public static class NoteV4Parser
         JObject noteJObj = new()
         {
             ["b"] = note.B,
-            ["r"] = note.R,
-            ["i"] = note.I,
+            ["r"] = note.R
         };
+
         JObject dataJObj = new()
         {
             ["x"] = note.X,
@@ -99,6 +101,7 @@ public static class NoteV4Parser
             ["d"] = (int)note.D,
             ["a"] = note.A,
         };
+
         return (noteJObj, dataJObj);
     }
 }

@@ -4,25 +4,15 @@
 public class Arc : Slider
 {
     /// <summary> Head Control Point Length Multiplier </summary>
-    public float MU { get; set; }
+    public float MU { get; set; } = 1.0f;
     /// <summary> Tail Control Point Length Multiplier </summary>
-    public float TMU { get; set; }
+    public float TMU { get; set; } = 1.0f;
     /// <summary> Mid-Anchor Mode </summary>
-    public int M { get; set; }
+    public int M { get; set; } = 0;
     /// <summary> Tail Color </summary>
-    public int TC { get; set; }
+    public int TC { get; set; } = 0;
     /// <summary> Tail Cut Direction </summary>
-    public CutDirection TD { get; set; }
-    /// <summary> Tail Data Index (V4) </summary>
-    public int? TI { get; set; }
-    /// <summary> Arc Data Index (V4) </summary>
-    public int? AI { get; set; }
+    public CutDirection TD { get; set; } = CutDirection.Down;
 
-    public override string ToString()
-    {
-        return base.ToString() +
-               $"\nHeadLengthMult: {MU}, TailCutDirection: {TD}, TailLengthMult: {TMU}, MidAnchorMode: {M}" +
-               $"{(TI.HasValue ? $", Tail Metadata Index: {TI}" : "")}" +
-               $"{(AI.HasValue ? $", Arc Metadata Index: {AI}" : "")}";
-    }
+    public override string ToString() => base.ToString() + $"\nHeadLengthMult: {MU}, TailCutDirection: {TD}, TailLengthMult: {TMU}, MidAnchorMode: {M}";
 }

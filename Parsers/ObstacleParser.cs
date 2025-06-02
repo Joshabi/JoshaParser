@@ -41,6 +41,7 @@ public static class ObstacleV2Parser
             ["_type"] = obstacle.Y == 0 && obstacle.H == 5 ? 0 : obstacle.Y == 2 && obstacle.H == 3 ? 1 : 2,
             ["_duration"] = obstacle.D
         };
+
         if (version is > BeatmapRevision.V250) obj["_lineLayer"] = obstacle.Y;
         obj["_width"] = obstacle.W;
         if (version is > BeatmapRevision.V250) obj["_height"] = obstacle.H;
@@ -86,10 +87,11 @@ public static class ObstacleV4Parser
         Obstacle obstacle = new()
         {
             B = (float)(oToken["b"] ?? 0),
-            R = (int)(oToken["r"] ?? 0),
-            I = (int)(oToken["i"] ?? 0),
+            R = (int)(oToken["r"] ?? 0)
         };
-        JToken? data = dToken[obstacle.I];
+
+        int obstacleIndex = (int)(oToken["i"] ?? 0);
+        JToken? data = dToken[obstacleIndex];
         if (data is not null) {
             obstacle.D = (float)(data["d"] ?? 0);
             obstacle.X = (int)(data["x"] ?? 0);
@@ -97,6 +99,7 @@ public static class ObstacleV4Parser
             obstacle.W = (int)(data["w"] ?? 1);
             obstacle.H = (int)(data["h"] ?? 5);
         }
+
         return obstacle;
     }
 
@@ -105,9 +108,9 @@ public static class ObstacleV4Parser
         JObject obstacleJObj = new()
         {
             ["b"] = obstacle.B,
-            ["r"] = obstacle.R,
-            ["i"] = obstacle.I,
+            ["r"] = obstacle.R
         };
+
         JObject dataJObj = new()
         {
             ["d"] = obstacle.D,
@@ -116,6 +119,7 @@ public static class ObstacleV4Parser
             ["w"] = obstacle.W,
             ["h"] = obstacle.H,
         };
+
         return (obstacleJObj, dataJObj);
     }
 }

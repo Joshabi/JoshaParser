@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace JoshaParser.Parsers;
 
-/// <summary> Responsible for loading a mapset </summary>
+/// <summary> Functionalities for loading Beat Saber map data </summary>
 public static class BeatmapLoader
 {
     /// <summary> Loads a map from a JSON string of the info.dat file. </summary>
@@ -48,8 +48,5 @@ public static class BeatmapLoader
     }
 
     private static T? Deserialize<T>(string json, JsonConverter converter)
-        => JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings
-        {
-            Converters = { converter }
-        });
+        => JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings { Converters = { converter } });
 }

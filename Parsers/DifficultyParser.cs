@@ -14,7 +14,7 @@ public static class DifficultyV2Parser
     {
         JToken notes = obj["_notes"] ?? new JArray();
         JToken obstacles = obj["_obstacles"] ?? new JArray();
-        List<EventV2> events = obj["_events"]?.ToObject<List<EventV2>>() ?? [];  // For old style BPM changes
+        List<LegacyEvent> events = obj["_events"]?.ToObject<List<LegacyEvent>>() ?? [];  // For old style BPM changes
 
         data.Bombs.AddRange(notes.Where(noteToken => (int)(noteToken["_type"] ?? 0) == 3).Select(BombV2Parser.Deserialize));
         data.Notes.AddRange(notes.Where(noteToken => (int)(noteToken["_type"] ?? 0) != 3).Select(NoteV2Parser.Deserialize));
