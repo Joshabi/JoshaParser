@@ -21,8 +21,7 @@ public static class DifficultyV2Parser
         data.Obstacles.AddRange(obstacles.Select(ObstacleV2Parser.Deserialize));
         data.RawBPMEvents.AddRange(events.Where(v2event => v2event.Type == 100).Select(v2event => new BPMEvent { B = v2event.Beat, M = v2event.FloatValue }));
 
-        if (data.Version is BeatmapRevision.V260)
-        {
+        if (data.Version is BeatmapRevision.V260) {
             JToken sliders = obj["_sliders"] ?? new JArray();
             data.Arcs.AddRange(sliders.Select(ArcV2Parser.Deserialize));
         }
@@ -34,7 +33,7 @@ public static class DifficultyV2Parser
         JObject obj = JObject.Parse(data.RawJSON ?? "{}");
         obj["_version"] = data.Version.ToVersionString();
 
-        var orderedObjects = data.Bombs.Cast<BeatObject>().Concat(data.Notes).OrderBy(obj => obj.B);
+        IOrderedEnumerable<BeatObject> orderedObjects = data.Bombs.Cast<BeatObject>().Concat(data.Notes).OrderBy(obj => obj.B);
         obj["_notes"] = new JArray(orderedObjects.Select(o => o is Bomb b ? BombV2Parser.Serialize(b) : NoteV2Parser.Serialize((Note)o)));
         obj["_obstacles"] = new JArray(data.Obstacles.Select(o => ObstacleV2Parser.Serialize(o, data.Version)));
 
@@ -110,33 +109,31 @@ public static class DifficultyV4Parser
         JObject obj = JObject.Parse(data.RawJSON ?? "{}");
         obj["version"] = data.Version.ToVersionString();
 
-        var colorNotes = new JArray();
-        var colorNotesData = new JArray();
-        var colorNotesDataMap = new Dictionary<string, int>();
+        JArray colorNotes = new();
+        JArray colorNotesData = new();
+        Dictionary<string, int> colorNotesDataMap = new();
 
-        var bombNotes = new JArray();
-        var bombNotesData = new JArray();
-        var bombNotesDataMap = new Dictionary<string, int>();
+        JArray bombNotes = new();
+        JArray bombNotesData = new();
+        Dictionary<string, int> bombNotesDataMap = new();
 
-        var obstaclesArr = new JArray();
-        var obstaclesData = new JArray();
-        var obstaclesDataMap = new Dictionary<string, int>();
+        JArray obstaclesArr = new();
+        JArray obstaclesData = new();
+        Dictionary<string, int> obstaclesDataMap = new();
 
-        var arcsArr = new JArray();
-        var arcsData = new JArray();
-        var arcsDataMap = new Dictionary<string, int>();
+        JArray arcsArr = new();
+        JArray arcsData = new();
+        Dictionary<string, int> arcsDataMap = new();
 
-        var chainsArr = new JArray();
-        var chainsData = new JArray();
-        var chainsDataMap = new Dictionary<string, int>();
+        JArray chainsArr = new();
+        JArray chainsData = new();
+        Dictionary<string, int> chainsDataMap = new();
 
         // Notes
-        foreach (var note in data.Notes)
-        {
-            (var noteToken, var dataToken) = NoteV4Parser.Serialize(note);
+        foreach (Note note in data.Notes) {
+            (JToken? noteToken, JToken? dataToken) = NoteV4Parser.Serialize(note);
             string key = dataToken.ToString(Formatting.None);
-            if (!colorNotesDataMap.TryGetValue(key, out int index))
-            {
+            if (!colorNotesDataMap.TryGetValue(key, out int index)) {
                 index = colorNotesData.Count;
                 colorNotesData.Add(dataToken);
                 colorNotesDataMap[key] = index;
@@ -146,12 +143,10 @@ public static class DifficultyV4Parser
         }
 
         // Bombs
-        foreach (var bomb in data.Bombs)
-        {
-            (var bombToken, var dataToken) = BombV4Parser.Serialize(bomb);
+        foreach (Bomb bomb in data.Bombs) {
+            (JToken? bombToken, JToken? dataToken) = BombV4Parser.Serialize(bomb);
             string key = dataToken.ToString(Formatting.None);
-            if (!bombNotesDataMap.TryGetValue(key, out int index))
-            {
+            if (!bombNotesDataMap.TryGetValue(key, out int index)) {
                 index = bombNotesData.Count;
                 bombNotesData.Add(dataToken);
                 bombNotesDataMap[key] = index;
@@ -161,12 +156,10 @@ public static class DifficultyV4Parser
         }
 
         // Obstacles
-        foreach (var obs in data.Obstacles)
-        {
-            (var obsToken, var dataToken) = ObstacleV4Parser.Serialize(obs);
+        foreach (Obstacle obs in data.Obstacles) {
+            (JToken? obsToken, JToken? dataToken) = ObstacleV4Parser.Serialize(obs);
             string key = dataToken.ToString(Formatting.None);
-            if (!obstaclesDataMap.TryGetValue(key, out int index))
-            {
+            if (!obstaclesDataMap.TryGetValue(key, out int index)) {
                 index = obstaclesData.Count;
                 obstaclesData.Add(dataToken);
                 obstaclesDataMap[key] = index;
@@ -176,29 +169,25 @@ public static class DifficultyV4Parser
         }
 
         // Arcs
-        foreach (var arc in data.Arcs)
-        {
-            (var arcToken, var metaToken, var headToken, var tailToken) = ArcV4Parser.Serialize(arc);
+        foreach (Arc arc in data.Arcs) {
+            (JToken? arcToken, JToken? metaToken, JToken? headToken, JToken? tailToken) = ArcV4Parser.Serialize(arc);
 
             string headKey = headToken.ToString(Formatting.None);
-            if (!colorNotesDataMap.TryGetValue(headKey, out int headIndex))
-            {
+            if (!colorNotesDataMap.TryGetValue(headKey, out int headIndex)) {
                 headIndex = colorNotesData.Count;
                 colorNotesData.Add(headToken);
                 colorNotesDataMap[headKey] = headIndex;
             }
 
             string tailKey = tailToken.ToString(Formatting.None);
-            if (!colorNotesDataMap.TryGetValue(tailKey, out int tailIndex))
-            {
+            if (!colorNotesDataMap.TryGetValue(tailKey, out int tailIndex)) {
                 tailIndex = colorNotesData.Count;
                 colorNotesData.Add(tailToken);
                 colorNotesDataMap[tailKey] = tailIndex;
             }
 
             string metaKey = metaToken.ToString(Formatting.None);
-            if (!arcsDataMap.TryGetValue(metaKey, out int metaIndex))
-            {
+            if (!arcsDataMap.TryGetValue(metaKey, out int metaIndex)) {
                 metaIndex = arcsData.Count;
                 arcsData.Add(metaToken);
                 arcsDataMap[metaKey] = metaIndex;
@@ -211,21 +200,18 @@ public static class DifficultyV4Parser
         }
 
         // Chains
-        foreach (var chain in data.Chains)
-        {
-            (var chainToken, var metaToken, var dataToken) = ChainV4Parser.Serialize(chain);
+        foreach (Chain chain in data.Chains) {
+            (JToken? chainToken, JToken? metaToken, JToken? dataToken) = ChainV4Parser.Serialize(chain);
 
             string dataKey = dataToken.ToString(Formatting.None);
-            if (!colorNotesDataMap.TryGetValue(dataKey, out int dataIndex))
-            {
+            if (!colorNotesDataMap.TryGetValue(dataKey, out int dataIndex)) {
                 dataIndex = colorNotesData.Count;
                 colorNotesData.Add(dataToken);
                 colorNotesDataMap[dataKey] = dataIndex;
             }
 
             string metaKey = metaToken.ToString(Formatting.None);
-            if (!chainsDataMap.TryGetValue(metaKey, out int metaIndex))
-            {
+            if (!chainsDataMap.TryGetValue(metaKey, out int metaIndex)) {
                 metaIndex = chainsData.Count;
                 chainsData.Add(metaToken);
                 chainsDataMap[metaKey] = metaIndex;

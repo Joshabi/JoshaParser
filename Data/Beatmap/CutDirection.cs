@@ -70,7 +70,7 @@ public static class CutDirectionExtensions
         bool clockwise = distance <= Ordered.Length / 2;
 
         // Calculate halfway point in the chosen direction
-        int halfwaySteps = (Math.Min(distance, Ordered.Length - distance) + ((roundUp) ? 1 : 0)) / 2;
+        int halfwaySteps = (Math.Min(distance, Ordered.Length - distance) + (roundUp ? 1 : 0)) / 2;
         int midwayIndex = (lastIndex + (clockwise ? halfwaySteps : -halfwaySteps) + Ordered.Length) % Ordered.Length;
 
         return Ordered[midwayIndex];

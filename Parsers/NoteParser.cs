@@ -73,8 +73,7 @@ public static class NoteV4Parser
             I = (int)(nToken["i"] ?? 0),
         };
         JToken? data = dToken[note.I];
-        if (data is not null)
-        {
+        if (data is not null) {
             note.X = (int)(data["x"] ?? 0);
             note.Y = (int)(data["y"] ?? 0);
             note.C = (int)(data["c"] ?? 0);

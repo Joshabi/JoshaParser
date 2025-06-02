@@ -105,8 +105,7 @@ public static class ArcV4Parser
             AI = (int)(aToken["ai"] ?? 0)
         };
         JToken? headData = dToken[arc.I];
-        if (headData is not null)
-        {
+        if (headData is not null) {
             arc.C = (int)(headData["c"] ?? 0);
             arc.X = (int)(headData["x"] ?? 0);
             arc.Y = (int)(headData["y"] ?? 0);
@@ -114,16 +113,14 @@ public static class ArcV4Parser
             arc.A = (int)(headData["a"] ?? 0);
         }
         JToken? tailData = dToken[arc.TI];
-        if (tailData is not null)
-        {
+        if (tailData is not null) {
             arc.TX = (int)(tailData["x"] ?? 0);
             arc.TY = (int)(tailData["y"] ?? 0);
             arc.TC = (int)(tailData["c"] ?? 0);
             arc.TD = (CutDirection)(int)(tailData["d"] ?? 0);
         }
         JToken? metaData = aMetaToken[arc.AI];
-        if (metaData is not null)
-        {
+        if (metaData is not null) {
             arc.MU = (float)(metaData["m"] ?? 0);
             arc.TMU = (float)(metaData["tm"] ?? 0);
             arc.M = (int)(metaData["a"] ?? 0);
@@ -151,7 +148,8 @@ public static class ArcV4Parser
             ["d"] = (int)arc.D,
             ["a"] = arc.A
         };
-        JObject tailData = new() {
+        JObject tailData = new()
+        {
             ["x"] = arc.TX,
             ["y"] = arc.TY,
             ["c"] = arc.TC,

@@ -1,6 +1,6 @@
 ﻿using JoshaParser.Data.Metadata;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace JoshaParser.Serialize;
 

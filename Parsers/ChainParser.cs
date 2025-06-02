@@ -56,8 +56,7 @@ public static class ChainV4Parser
             CI = (int)(cToken["ci"] ?? 0),
         };
         JToken? headData = dToken[chain.I];
-        if (headData is not null)
-        {
+        if (headData is not null) {
             chain.C = (int)(headData["c"] ?? 0);
             chain.X = (int)(headData["x"] ?? 0);
             chain.Y = (int)(headData["y"] ?? 0);
@@ -65,8 +64,7 @@ public static class ChainV4Parser
             chain.A = (int)(headData["a"] ?? 0);
         }
         JToken? metaData = cMetaToken[chain.CI];
-        if (metaData is not null)
-        {
+        if (metaData is not null) {
             chain.TX = (int)(metaData["tx"] ?? 0);
             chain.TY = (int)(metaData["ty"] ?? 0);
             chain.SC = (int)(metaData["c"] ?? 0);

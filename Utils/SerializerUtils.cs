@@ -8,30 +8,18 @@ public static class SerializerUtils
 {
     public static void FormatNumbers(JToken token)
     {
-        if (token.Type == JTokenType.Object)
-        {
-            foreach (var property in ((JObject)token).Properties())
-            {
+        if (token.Type == JTokenType.Object) {
+            foreach (JProperty property in ((JObject)token).Properties()) {
                 FormatNumbers(property.Value);
             }
-        }
-        else if (token.Type == JTokenType.Array)
-        {
-            foreach (var item in (JArray)token)
-            {
+        } else if (token.Type == JTokenType.Array) {
+            foreach (JToken item in (JArray)token) {
                 FormatNumbers(item);
             }
-        }
-        else if (token.Type == JTokenType.Float)
-        {
+        } else if (token.Type == JTokenType.Float) {
             double value = token.Value<double>();
 
-            JValue replacement;
-            if (value % 1 == 0)
-                replacement = new JValue((long)value);
-            else
-                replacement = new JValue(Math.Round(value, 3));
-
+            JValue replacement = value % 1 == 0 ? new JValue((long)value) : new JValue(Math.Round(value, 3));
             token.Replace(replacement);
         }
     }
@@ -58,8 +46,7 @@ public static class BeatmapAudioDataExtensions
         float songFrequency = audioData.SongFrequency;
         List<BPMEvent> bpmChanges = [];
 
-        foreach (BPMDataSegment segment in audioData.BPMData)
-        {
+        foreach (BPMDataSegment segment in audioData.BPMData) {
             float durationSamples = segment.EI - segment.SI;
             float durationSeconds = durationSamples / songFrequency;
             float durationMinutes = durationSeconds / 60f;

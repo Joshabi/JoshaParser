@@ -65,8 +65,7 @@ public static class BombV4Parser
             I = (int)(bToken["i"] ?? 0),
         };
         JToken? data = dToken[bomb.I];
-        if (data is not null)
-        {
+        if (data is not null) {
             bomb.X = (int)(data["x"] ?? 0);
             bomb.Y = (int)(data["y"] ?? 0);
         }

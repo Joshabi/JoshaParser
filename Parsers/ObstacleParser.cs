@@ -12,8 +12,7 @@ public static class ObstacleV2Parser
         int y = (int)(oToken["_lineLayer"] ?? 0);
         int h = (int)(oToken["_height"] ?? 5);
 
-        if (oToken["_lineLayer"] == null && oToken["_type"] != null)
-        {
+        if (oToken["_lineLayer"] == null && oToken["_type"] != null) {
             (y, h) = (int)(oToken["_type"] ?? 0) switch
             {
                 0 => (0, 5),
@@ -35,11 +34,13 @@ public static class ObstacleV2Parser
 
     public static JToken Serialize(Obstacle obstacle, BeatmapRevision version = BeatmapRevision.V260)
     {
-        JObject obj = new();
-        obj["_time"] = obstacle.B;
-        obj["_lineIndex"] = obstacle.X;
-        obj["_type"] = obstacle.Y == 0 && obstacle.H == 5 ? 0 : obstacle.Y == 2 && obstacle.H == 3 ? 1 : 2;
-        obj["_duration"] = obstacle.D;
+        JObject obj = new()
+        {
+            ["_time"] = obstacle.B,
+            ["_lineIndex"] = obstacle.X,
+            ["_type"] = obstacle.Y == 0 && obstacle.H == 5 ? 0 : obstacle.Y == 2 && obstacle.H == 3 ? 1 : 2,
+            ["_duration"] = obstacle.D
+        };
         if (version is > BeatmapRevision.V250) obj["_lineLayer"] = obstacle.Y;
         obj["_width"] = obstacle.W;
         if (version is > BeatmapRevision.V250) obj["_height"] = obstacle.H;
@@ -89,8 +90,7 @@ public static class ObstacleV4Parser
             I = (int)(oToken["i"] ?? 0),
         };
         JToken? data = dToken[obstacle.I];
-        if (data is not null)
-        {
+        if (data is not null) {
             obstacle.D = (float)(data["d"] ?? 0);
             obstacle.X = (int)(data["x"] ?? 0);
             obstacle.Y = (int)(data["y"] ?? 0);

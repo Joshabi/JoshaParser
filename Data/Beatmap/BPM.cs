@@ -42,8 +42,7 @@ public class BPMContext
     public static BPMContext CreateBPMContext(float BPM, List<BPMEvent> BPMChanges, float offset)
     {
         List<BPMChangeEvent> changes = [];
-        foreach (BPMEvent BPMEvent in BPMChanges)
-        {
+        foreach (BPMEvent BPMEvent in BPMChanges) {
             changes.Add(new(BPMEvent));
         }
         return new BPMContext(BPM, changes, offset);
@@ -55,8 +54,7 @@ public class BPMContext
         List<BPMChangeEvent> alteredBPMChanges = [];
         BPMChangeEvent? temp = null;
 
-        foreach (BPMChangeEvent curBPMChange in BPMChanges)
-        {
+        foreach (BPMChangeEvent curBPMChange in BPMChanges) {
             curBPMChange.NB = temp != null
                 ? (float)Math.Ceiling(((curBPMChange.B - temp.B) / BPM * temp.M) + temp.NB - 0.01)
                 : (float)Math.Ceiling(curBPMChange.B - (_offset * BPM / 60) - 0.01);
@@ -71,8 +69,7 @@ public class BPMContext
     public List<BPMTimeScaler> GetTimeScale(List<BPMChangeEvent> BPMChanges)
     {
         List<BPMTimeScaler> timeScale = [];
-        foreach (BPMChangeEvent bpm in BPMChanges)
-        {
+        foreach (BPMChangeEvent bpm in BPMChanges) {
             BPMTimeScaler ibpm = new()
             {
                 T = bpm.B,
@@ -90,10 +87,8 @@ public class BPMContext
         if (!timescale) return beat / BPM * 60;
 
         float calculatedBeat = 0;
-        for (int i = _timeScale.Count - 1; i >= 0; i--)
-        {
-            if (beat > _timeScale[i].T)
-            {
+        for (int i = _timeScale.Count - 1; i >= 0; i--) {
+            if (beat > _timeScale[i].T) {
                 calculatedBeat += (beat - _timeScale[i].T) * _timeScale[i].S;
                 beat = _timeScale[i].T;
             }
@@ -108,11 +103,9 @@ public class BPMContext
         if (!timescale) return seconds * BPM / 60;
 
         float calculatedSecond = 0;
-        for (int i = _timeScale.Count - 1; i >= 0; i--)
-        {
+        for (int i = _timeScale.Count - 1; i >= 0; i--) {
             float currentSeconds = ToRealTime(_timeScale[i].T);
-            if (seconds > currentSeconds)
-            {
+            if (seconds > currentSeconds) {
                 calculatedSecond += (seconds - currentSeconds) / _timeScale[i].S;
                 seconds = currentSeconds;
             }
@@ -123,10 +116,8 @@ public class BPMContext
     /// <summary> Converts to JSON File time </summary>
     public float ToJsonTime(float beat)
     {
-        for (int i = BPMChanges.Count - 1; i >= 0; i--)
-        {
-            if (beat > BPMChanges[i].NB)
-            {
+        for (int i = BPMChanges.Count - 1; i >= 0; i--) {
+            if (beat > BPMChanges[i].NB) {
                 return ((beat - BPMChanges[i].NB) / BPMChanges[i].M * BPM) + BPMChanges[i].B;
             }
         }
@@ -136,10 +127,8 @@ public class BPMContext
     /// <summary> Updates the current BPM value stored based on BPM Changes and provided beat value </summary>
     public void SetCurrentBPM(float beat)
     {
-        for (int i = 0; i < BPMChanges.Count; i++)
-        {
-            if (beat > BPMChanges[i].B)
-            {
+        for (int i = 0; i < BPMChanges.Count; i++) {
+            if (beat > BPMChanges[i].B) {
                 BPM = BPMChanges[i].M;
             }
         }

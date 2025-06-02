@@ -1,7 +1,7 @@
 ﻿using JoshaParser.Data.Metadata;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using JoshaParser.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace JoshaParser.Serialize;
 
@@ -19,14 +19,13 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
         if (string.IsNullOrEmpty(version.ToString())) return null;
         data.Version = version.ToString().ToBeatmapInfoRevision();
 
-        switch (data.Version)
-        {
+        switch (data.Version) {
             case BeatmapInfoRevision.V200 or BeatmapInfoRevision.V210:
-                DeserializeV2(obj, ref data);
-                break;
+            DeserializeV2(obj, ref data);
+            break;
             case BeatmapInfoRevision.V400 or BeatmapInfoRevision.V401:
-                DeserializeV4(obj, ref data);
-                break;
+            DeserializeV4(obj, ref data);
+            break;
             default: Console.WriteLine("Unsupported Version"); return null;
         }
 
@@ -63,12 +62,10 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
 
         // Parse DifficultyBeatmaps
         List<JObject> difficultyBeatmapSets = jObject["_difficultyBeatmapSets"]?.ToObject<List<JObject>>() ?? [];
-        foreach (JObject difficultyBeatmapSet in difficultyBeatmapSets)
-        {
+        foreach (JObject difficultyBeatmapSet in difficultyBeatmapSets) {
             string? characteristicName = difficultyBeatmapSet["_beatmapCharacteristicName"]?.ToString();
             List<JObject> difficultyBeatmaps = difficultyBeatmapSet["_difficultyBeatmaps"]?.ToObject<List<JObject>>() ?? [];
-            foreach (JObject difficultyBeatmap in difficultyBeatmaps)
-            {
+            foreach (JObject difficultyBeatmap in difficultyBeatmaps) {
                 data.DifficultyBeatmaps.Add(new DifficultyInfo
                 {
                     Characteristic = characteristicName ?? "",
@@ -94,7 +91,8 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
         data.SongName = jObject["song"]?["title"]?.ToString() ?? "";
         data.SongSubName = jObject["song"]?["subTitle"]?.ToString() ?? "";
         data.SongArtist = jObject["song"]?["author"]?.ToString() ?? "";
-        data.Song = new() { 
+        data.Song = new()
+        {
             SongFilename = jObject["audio"]?["songFilename"]?.ToString() ?? "",
             SongDuration = (float)(jObject["audio"]?["songDuration"] ?? 0),
             AudioDataFilename = jObject["audio"]?["audioDataFilename"]?.ToString() ?? "",
@@ -109,8 +107,7 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
         data.DifficultyBeatmaps = difficultyBeatmaps;
         data.Mapper = data.DifficultyBeatmaps?.FirstOrDefault()?.BeatmapAuthors?.Mappers?.FirstOrDefault() ?? "";
 
-        foreach (DifficultyInfo diff in data.DifficultyBeatmaps ?? [])
-        {
+        foreach (DifficultyInfo diff in data.DifficultyBeatmaps ?? []) {
             diff.Rank = Enum.TryParse(diff.Difficulty, true, out BeatmapDifficultyRank parsedRank)
                 ? parsedRank
                 : BeatmapDifficultyRank.ExpertPlus;

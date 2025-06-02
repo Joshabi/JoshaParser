@@ -14,7 +14,7 @@ public class Obstacle : BeatGridObject
     /// <summary> Metadata Index (V4) </summary>
     public int? I { get; set; }
     /// <summary> Returns Type of wall (Depreciated beyond 2.5.0) </summary>
-    public int T { get => Y == 0 && H == 5 ? 0 : Y == 2 && H == 3 ? 1 : 2; } // T - Type (V2)
+    public int T => Y == 0 && H == 5 ? 0 : Y == 2 && H == 3 ? 1 : 2;  // T - Type (V2)
 
     public override string ToString()
     {

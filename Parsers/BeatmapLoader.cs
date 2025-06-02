@@ -38,8 +38,7 @@ public static class BeatmapLoader
     /// <summary> Loads all difficulties for a given SongData object. </summary>
     public static void LoadDifficulties(ref SongInfo songData)
     {
-        foreach (var diffInfo in songData.DifficultyBeatmaps)
-        {
+        foreach (DifficultyInfo diffInfo in songData.DifficultyBeatmaps) {
             string path = Path.Combine(songData.MapPath, diffInfo.BeatmapDataFilename);
             if (!File.Exists(path)) continue;
 
@@ -49,7 +48,8 @@ public static class BeatmapLoader
     }
 
     private static T? Deserialize<T>(string json, JsonConverter converter)
-        => JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings {
+        => JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings
+        {
             Converters = { converter }
         });
 }

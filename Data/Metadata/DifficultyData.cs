@@ -1,5 +1,4 @@
 ﻿using JoshaParser.Data.Beatmap;
-using Newtonsoft.Json.Linq;
 
 namespace JoshaParser.Data.Metadata;
 
