@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace JoshaParser.Data.Metadata;
 
@@ -27,7 +26,7 @@ public class SongInfo
 
     public override string ToString()
     {
-        var difficulties = DifficultyBeatmaps != null && DifficultyBeatmaps.Count > 0
+        string difficulties = DifficultyBeatmaps != null && DifficultyBeatmaps.Count > 0
             ? string.Join("\n", DifficultyBeatmaps.Select(d => d.ToString()))
             : "(no difficulties)";
 
@@ -49,10 +48,7 @@ public class BeatmapAuthors
 {
     public List<string> Mappers { get; set; } = [];
     public List<string> Lighters { get; set; } = [];
-    public override string ToString()
-    {
-        return $"Mappers: {Mappers}, Lighters:{Lighters}";
-    }
+    public override string ToString() => $"Mappers: {Mappers}, Lighters:{Lighters}";
 }
 
 /// <summary> Represents Song metadata </summary>
@@ -67,10 +63,7 @@ public class AudioData
     public float PreviewDuration { get; set; }
     public string SongPreviewFilename { get; set; } = string.Empty;
 
-    public override string ToString()
-    {
-        return $"Song Filename: {SongFilename}, Duration:{SongDuration}, Audio Data Filename:{AudioDataFilename}, BPM:{BPM}, LUFS:{LUFS}, Preview Start:{PreviewStartTime}, Preview Duration:{PreviewDuration}";
-    }
+    public override string ToString() => $"Song Filename: {SongFilename}, Duration:{SongDuration}, Audio Data Filename:{AudioDataFilename}, BPM:{BPM}, LUFS:{LUFS}, Preview Start:{PreviewStartTime}, Preview Duration:{PreviewDuration}";
 }
 
 /// <summary> Represents difficulty metadata </summary>

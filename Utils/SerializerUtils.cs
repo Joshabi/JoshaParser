@@ -1,53 +1,9 @@
 ﻿using JoshaParser.Data.Beatmap;
 using JoshaParser.Data.Metadata;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace JoshaParser.Utils;
-
-public static class SerializerUtils
-{
-    public static void FormatNumbers(JToken token)
-    {
-        if (token.Type == JTokenType.Object)
-        {
-            foreach (var property in ((JObject)token).Properties())
-            {
-                FormatNumbers(property.Value);
-            }
-        }
-        else if (token.Type == JTokenType.Array)
-        {
-            foreach (var item in (JArray)token)
-            {
-                FormatNumbers(item);
-            }
-        }
-        else if (token.Type == JTokenType.Float)
-        {
-            double value = token.Value<double>();
-
-            JValue replacement;
-            if (value % 1 == 0)
-                replacement = new JValue((long)value);
-            else
-                replacement = new JValue(Math.Round(value, 3));
-
-            token.Replace(replacement);
-        }
-    }
-
-    public static int AddOrGetIndex(Dictionary<string, int> dict, List<JObject> list, string jsonString)
-    {
-        if (dict.TryGetValue(jsonString, out int index))
-            return index;
-
-        JObject obj = JObject.Parse(jsonString);
-        index = list.Count;
-        list.Add(obj);
-        dict[jsonString] = index;
-        return index;
-    }
-}
 
 /// <summary> Extension functionality for BPM/Audio data </summary>
 public static class BeatmapAudioDataExtensions
@@ -58,8 +14,7 @@ public static class BeatmapAudioDataExtensions
         float songFrequency = audioData.SongFrequency;
         List<BPMEvent> bpmChanges = [];
 
-        foreach (BPMDataSegment segment in audioData.BPMData)
-        {
+        foreach (BPMDataSegment segment in audioData.BPMData) {
             float durationSamples = segment.EI - segment.SI;
             float durationSeconds = durationSamples / songFrequency;
             float durationMinutes = durationSeconds / 60f;
@@ -75,5 +30,53 @@ public static class BeatmapAudioDataExtensions
 
         float initialBPM = bpmChanges.FirstOrDefault()?.M ?? defaultBPM;
         return BPMContext.CreateBPMContext(initialBPM, bpmChanges, songTimeOffset);
+    }
+}
+
+/// <summary> JsonConverter that formats all numeric values in JObjects and JArrays to a specified number of decimal places </summary>
+public class JTokenDecimalFormatter(int decimalPlaces = 2) : JsonConverter
+{
+    private readonly int _decimalPlaces = decimalPlaces;
+
+    public override bool CanConvert(Type objectType) => typeof(JToken).IsAssignableFrom(objectType);
+
+    public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) => JToken.ReadFrom(reader);
+
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    {
+        if (value is JToken token) {
+            WriteJToken(writer, token);
+        }
+    }
+
+    private void WriteJToken(JsonWriter writer, JToken token)
+    {
+        switch (token.Type) {
+            case JTokenType.Object:
+            writer.WriteStartObject();
+            foreach (JProperty property in token.Children<JProperty>()) {
+                writer.WritePropertyName(property.Name);
+                WriteJToken(writer, property.Value);
+            }
+            writer.WriteEndObject();
+            break;
+
+            case JTokenType.Array:
+            writer.WriteStartArray();
+            foreach (JToken item in token.Children()) {
+                WriteJToken(writer, item);
+            }
+            writer.WriteEndArray();
+            break;
+
+            case JTokenType.Float:
+            double doubleValue = token.Value<double>();
+            writer.WriteValue(Math.Round(doubleValue, _decimalPlaces));
+            break;
+
+            default:
+            token.WriteTo(writer);
+            break;
+        }
     }
 }

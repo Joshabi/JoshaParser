@@ -4,21 +4,13 @@
 public class Note : BeatGridObject
 {
     /// <summary> Color </summary>
-    public int C { get; set; }
+    public int C { get; set; } = 0;
     /// <summary> Cut Direction </summary>
-    public CutDirection D { get; set; }
-    /// <summary> Angle Offset (V3) </summary>
-    public float A { get; set; }
-    /// <summary> Rotation Lane (V3) </summary>
-    public int? R { get; set; }
-    /// <summary> Metadata Index (V4) </summary>
-    public int? I { get; set; }
+    public CutDirection D { get; set; } = CutDirection.Any;
+    /// <summary> Angle Offset (V3) - Angle applied counter-clockwise to the Cut Direction </summary>
+    public int A { get; set; } = 0;
+    /// <summary> Rotation Lane (V4) - Specific for 360 or 90 degree characteristic </summary>
+    public int R { get; set; } = 0;
 
-    public override string ToString()
-    {
-        return $"Beat: {B}, X: {X}, Y: {Y}, Color: {C}, Direction: {D}" +
-               $", Angle Offset: {A}" +
-               $"{(R.HasValue ? $", Rotation Lane: {R}" : "")}" +
-               $"{(I.HasValue ? $", Metadata Index: {I}" : "")}";
-    }
+    public override string ToString() => $"Beat: {B}, X: {X}, Y: {Y}, Color: {C}, Direction: {D}";
 }

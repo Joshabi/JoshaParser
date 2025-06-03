@@ -50,28 +50,29 @@ public static class ChainV4Parser
         {
             B = (float)(cToken["hb"] ?? 0),
             TB = (float)(cToken["tb"] ?? 0),
-            HR = (float)(cToken["hr"] ?? 0),
-            TR = (float)(cToken["tr"] ?? 0),
-            I = (int)(cToken["i"] ?? 0),
-            CI = (int)(cToken["ci"] ?? 0),
+            HR = (int)(cToken["hr"] ?? 0),
+            TR = (int)(cToken["tr"] ?? 0)
         };
-        JToken? headData = dToken[chain.I];
-        if (headData is not null)
-        {
+
+        int chainIndex = (int)(cToken["i"] ?? 0);
+        int chainMetaIndex = (int)(cToken["ci"] ?? 0);
+        JToken? headData = dToken[chainIndex];
+        if (headData is not null) {
             chain.C = (int)(headData["c"] ?? 0);
             chain.X = (int)(headData["x"] ?? 0);
             chain.Y = (int)(headData["y"] ?? 0);
             chain.D = (CutDirection)(int)(headData["d"] ?? 0);
             chain.A = (int)(headData["a"] ?? 0);
         }
-        JToken? metaData = cMetaToken[chain.CI];
-        if (metaData is not null)
-        {
+
+        JToken? metaData = cMetaToken[chainMetaIndex];
+        if (metaData is not null) {
             chain.TX = (int)(metaData["tx"] ?? 0);
             chain.TY = (int)(metaData["ty"] ?? 0);
             chain.SC = (int)(metaData["c"] ?? 0);
             chain.SF = (float)(metaData["s"] ?? 1.0f);
         }
+
         return chain;
     }
 
@@ -82,10 +83,9 @@ public static class ChainV4Parser
             ["hb"] = chain.B,
             ["tb"] = chain.TB,
             ["hr"] = chain.HR,
-            ["tr"] = chain.TR,
-            ["i"] = chain.I,
-            ["ci"] = chain.CI
+            ["tr"] = chain.TR
         };
+
         JObject dToken = new()
         {
             ["x"] = chain.X,
@@ -94,6 +94,7 @@ public static class ChainV4Parser
             ["d"] = (int)chain.D,
             ["a"] = chain.A
         };
+
         JObject cMetaToken = new()
         {
             ["tx"] = chain.TX,
@@ -101,6 +102,7 @@ public static class ChainV4Parser
             ["c"] = chain.SC,
             ["s"] = chain.SF
         };
+
         return (cToken, cMetaToken, dToken);
     }
 }

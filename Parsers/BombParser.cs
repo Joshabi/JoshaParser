@@ -24,7 +24,7 @@ public static class BombV2Parser
             ["_lineIndex"] = bomb.X,
             ["_lineLayer"] = bomb.Y,
             ["_type"] = 3,
-            ["_cutDirection"] = 1
+            ["_cutDirection"] = 0
         };
     }
 }
@@ -61,15 +61,16 @@ public static class BombV4Parser
         Bomb bomb = new()
         {
             B = (float)(bToken["b"] ?? 0),
-            R = (int)(bToken["r"] ?? 0),
-            I = (int)(bToken["i"] ?? 0),
+            R = (int)(bToken["r"] ?? 0)
         };
-        JToken? data = dToken[bomb.I];
-        if (data is not null)
-        {
+
+        int bombIndex = (int)(bToken["i"] ?? 0);
+        JToken? data = dToken[bombIndex];
+        if (data is not null) {
             bomb.X = (int)(data["x"] ?? 0);
             bomb.Y = (int)(data["y"] ?? 0);
         }
+
         return bomb;
     }
 
@@ -78,14 +79,15 @@ public static class BombV4Parser
         JObject bObject = new()
         {
             ["b"] = note.B,
-            ["r"] = note.R,
-            ["i"] = note.I
+            ["r"] = note.R
         };
+
         JObject dObject = new()
         {
             ["x"] = note.X,
             ["y"] = note.Y
         };
+
         return (bObject, dObject);
     }
 }

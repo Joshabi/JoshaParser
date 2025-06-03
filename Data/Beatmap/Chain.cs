@@ -4,16 +4,9 @@
 public class Chain : Slider
 {
     /// <summary> Segment Count </summary>
-    public int SC { get; set; }
+    public int SC { get; set; } = 1;
     /// <summary> Squish Factor </summary>
-    public float SF { get; set; }
-    /// <summary> Chain Data Metadata (V4) </summary>
-    public int? CI { get; set; }
+    public float SF { get; set; } = 0.5f;
 
-    public override string ToString()
-    {
-        return base.ToString() +
-               $"\nSliceCount: {SC}, SquishFactor: {SF}" +
-               $"{(CI.HasValue ? $", Chain Metadata Index: {CI}" : "")}";
-    }
+    public override string ToString() => $"\nSliceCount: {SC}, SquishFactor: {SF}";
 }

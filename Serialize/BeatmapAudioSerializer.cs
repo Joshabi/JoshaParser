@@ -1,6 +1,7 @@
 ﻿using JoshaParser.Data.Metadata;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace JoshaParser.Serialize;
 
@@ -13,8 +14,8 @@ public class BeatmapAudioInfoSerializer : JsonConverter<AudioInfo>
         JObject jsonObject = JObject.Load(reader);
         return new AudioInfo()
         {
-            Version = jsonObject["version"]?.ToString() ?? "",
-            SongChecksum = jsonObject["songChecksum"]?.ToString() ?? "",
+            Version = jsonObject["version"]?.ToString() ?? string.Empty,
+            SongChecksum = jsonObject["songChecksum"]?.ToString() ?? string.Empty,
             SongSampleCount = jsonObject["songSampleCount"]?.ToObject<int>() ?? 0,
             SongFrequency = jsonObject["songFrequency"]?.ToObject<int>() ?? 0,
             BPMData = jsonObject["bpmData"]?.ToObject<List<BPMDataSegment>>(serializer) ?? [],
@@ -25,7 +26,7 @@ public class BeatmapAudioInfoSerializer : JsonConverter<AudioInfo>
     /// <summary> [Unsupported] Handles writing to audio.dat json </summary>
     public override void WriteJson(JsonWriter writer, AudioInfo? value, JsonSerializer serializer)
     {
-        Console.WriteLine("Serializing back to file is not supported");
+        Trace.WriteLine("Serializing back to file is not supported");
         writer.WriteNull();
         return;
     }
