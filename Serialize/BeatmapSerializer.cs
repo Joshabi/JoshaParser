@@ -42,7 +42,7 @@ public class BeatmapSerializer : JsonConverter<DifficultyData>
     public override void WriteJson(JsonWriter writer, DifficultyData? value, JsonSerializer serializer)
     {
         if (value == null || value.Version >= BeatmapRevision.V400) {
-            Console.WriteLine("Version is unsupported or provided data is incorrect");
+            Trace.WriteLine($"Version {value?.Version} is unsupported or provided data is incorrect");
             return;
         }
 
@@ -53,7 +53,16 @@ public class BeatmapSerializer : JsonConverter<DifficultyData>
             _ => []
         };
 
-        SerializerUtils.FormatNumbers(output);
-        output.WriteTo(writer);
+        JsonSerializer jTokenSerializer = new()
+        {
+            Formatting = serializer.Formatting,
+            Culture = serializer.Culture,
+            DateFormatHandling = serializer.DateFormatHandling,
+            DefaultValueHandling = serializer.DefaultValueHandling,
+            TypeNameHandling = serializer.TypeNameHandling,
+            Converters = { new JTokenDecimalFormatter(3) }
+        };
+
+        jTokenSerializer.Serialize(writer, output);
     }
 }

@@ -2,6 +2,7 @@
 using JoshaParser.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace JoshaParser.Serialize;
 
@@ -26,7 +27,7 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
             case BeatmapInfoRevision.V400 or BeatmapInfoRevision.V401:
             DeserializeV4(obj, ref data);
             break;
-            default: Console.WriteLine("Unsupported Version"); return null;
+            default: Trace.WriteLine("Unsupported Version"); return null;
         }
 
         // CustomData: Contributors handling (To my knowledge not version specific?)
@@ -117,7 +118,7 @@ public class BeatmapInfoSerializer : JsonConverter<SongInfo>
     /// <summary> [Unsupported] Writes back to the info.dat file </summary>
     public override void WriteJson(JsonWriter writer, SongInfo? value, JsonSerializer serializer)
     {
-        Console.WriteLine("Serializing back to file is not supported");
+        Trace.WriteLine("Serializing back to file is not supported");
         writer.WriteNull();
         return;
     }

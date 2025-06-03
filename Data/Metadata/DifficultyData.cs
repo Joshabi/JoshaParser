@@ -12,6 +12,7 @@ public class DifficultyData
     public List<Obstacle> Obstacles { get; set; } = [];
     public List<Arc> Arcs { get; set; } = [];
     public List<Chain> Chains { get; set; } = [];
+    public LightshowInfo Lightshow { get; set; } = new();
 
     public string? RawJSON { get; set; }
 
@@ -23,7 +24,8 @@ public class DifficultyData
                $"Obstacles: {Obstacles.Count}\n" +
                $"Arcs: {Arcs.Count}\n" +
                $"Chains: {Chains.Count}\n" +
-               $"Raw BPM Events: {RawBPMEvents.Count}\n";
+               $"Raw BPM Events: {RawBPMEvents.Count}\n" +
+               $"Lightshow Data: {Lightshow}\n";
     }
 }
 

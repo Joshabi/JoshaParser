@@ -24,7 +24,6 @@ public static class BeatmapUtils
 /// <summary> Extensions class for generic BeatmapData </summary>
 public static class BeatmapExtensions
 {
-
     /// <summary> Converts string to BeatmapRevision </summary>
     public static BeatmapRevision ToBeatmapRevision(this string revisionString)
     {
@@ -73,6 +72,7 @@ public static class BeatmapExtensions
             "2.0.0" => BeatmapInfoRevision.V200,
             "2.1.0" => BeatmapInfoRevision.V210,
             "4.0.0" => BeatmapInfoRevision.V400,
+            "4.0.1" => BeatmapInfoRevision.V401,
             _ => BeatmapInfoRevision.Unknown,
         };
     }
@@ -85,6 +85,7 @@ public static class BeatmapExtensions
             BeatmapInfoRevision.V200 => "2.0.0",
             BeatmapInfoRevision.V210 => "2.2.0",
             BeatmapInfoRevision.V400 => "4.0.0",
+            BeatmapInfoRevision.V401 => "4.0.1",
             _ => "Unknown",
         };
     }
