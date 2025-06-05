@@ -80,7 +80,6 @@ public class DifficultyInfo
     public float NoteJumpStartBeatOffset { get; set; }
     public string BeatmapDataFilename { get; set; } = string.Empty;
     public string LightshowDataFilename { get; set; } = string.Empty;
-    public DifficultyData DifficultyData { get; set; } = new();
 
     public override string ToString()
     {

@@ -5,12 +5,53 @@ using System.Diagnostics;
 
 namespace JoshaParser.Parsers;
 
-/// <summary> Functionalities for loading Beat Saber map data </summary>
+/// <summary> Represents a Beat Saber map with metadata and cache of loaded difficulties </summary>
+public class Beatmap(SongInfo metadata, AudioInfo? audioData = null)
+{
+    public SongInfo SongData { get; } = metadata;
+    public AudioInfo? AudioData { get; } = audioData;
+    private readonly Dictionary<DifficultyInfo, DifficultyData> _cache = [];
+
+    /// <summary> Lazy-loaded difficulty data for a specific difficulty </summary>
+    public DifficultyData? FetchDifficulty(DifficultyInfo difficultyInfo)
+    {
+        if (_cache.TryGetValue(difficultyInfo, out DifficultyData data))
+            return data;
+
+        string path = Path.Combine(SongData.MapPath, difficultyInfo.BeatmapDataFilename);
+        if (!File.Exists(path)) return null;
+        string json = File.ReadAllText(path);
+        DifficultyData? loaded = BeatmapLoader.LoadDifficultyFromString(json);
+        if (loaded != null)
+            _cache[difficultyInfo] = loaded;
+        return loaded;
+    }
+
+    /// <summary> Loads all difficulties into the cache. </summary>
+    public void FetchAllDifficulties()
+    {
+        foreach (DifficultyInfo difficulty in SongData.DifficultyBeatmaps)
+            FetchDifficulty(difficulty);
+    }
+
+    public IReadOnlyDictionary<DifficultyInfo, DifficultyData> GetCachedDifficulties() => _cache;
+    public void ClearCache() => _cache.Clear();
+}
+
+/// <summary> Configuration options for loading Beat Saber maps </summary>
+public class BeatmapLoaderConfig
+{
+    public bool LoadAllDifficulties { get; set; } = true;
+    public bool LoadLightshowData { get; set; } = true;
+}
+
+/// <summary> Functionalities for loading and saving Beatmaps </summary>
 public static class BeatmapLoader
 {
     /// <summary> Loads a map from a JSON string of the info.dat file. </summary>
-    public static SongInfo? LoadMapFromDirectory(string folder)
+    public static Beatmap? LoadMapFromDirectory(string folder, BeatmapLoaderConfig? config = null)
     {
+        config ??= new BeatmapLoaderConfig();
         try {
             if (!Directory.Exists(folder)) {
                 Trace.WriteLine($"Directory does not exist: {folder}");
@@ -32,8 +73,16 @@ public static class BeatmapLoader
             }
 
             songInfo.MapPath = folder;
-            LoadDifficulties(songInfo);
-            return songInfo;
+            string audioPath = Path.Combine(folder, songInfo.Song.AudioDataFilename);
+            AudioInfo? audioInfo = File.Exists(audioPath)
+                ? LoadAudioDataFromString(File.ReadAllText(audioPath))
+                : null;
+            Beatmap map = new(songInfo, audioInfo);
+
+            if (config.LoadAllDifficulties)
+                map.FetchAllDifficulties();
+
+            return map;
         } catch (Exception ex) {
             Trace.WriteLine($"Error loading map from directory {folder}: {ex.Message}");
             return null;
@@ -52,31 +101,6 @@ public static class BeatmapLoader
     public static AudioInfo? LoadAudioDataFromString(string jsonString)
         => Deserialize<AudioInfo>(jsonString, new BeatmapAudioInfoSerializer());
 
-    /// <summary> Loads all difficulties for a given SongData object. </summary>
-    public static void LoadDifficulties(SongInfo songData)
-    {
-        foreach (DifficultyInfo diffInfo in songData.DifficultyBeatmaps) {
-            try {
-                string path = Path.Combine(songData.MapPath, diffInfo.BeatmapDataFilename);
-                if (!File.Exists(path)) {
-                    Trace.WriteLine($"Could not find difficulty file at: {path}");
-                    continue;
-                }
-
-                string json = File.ReadAllText(path);
-                DifficultyData? d = LoadDifficultyFromString(json);
-                if (d == null) {
-                    Trace.WriteLine($"Failed to load difficulty data from: {path}");
-                    continue;
-                }
-
-                diffInfo.DifficultyData = d;
-            } catch (Exception ex) {
-                Trace.WriteLine($"Error loading difficulty from {diffInfo.BeatmapDataFilename}: {ex.Message}");
-            }
-        }
-    }
-
     private static T? Deserialize<T>(string json, JsonConverter converter)
     {
         try {
@@ -88,19 +112,21 @@ public static class BeatmapLoader
     }
 
     /// <summary> Saves a map to the specified directory. </summary>
-    public static bool SaveMapToDirectory(SongInfo songInfo, string folder)
+    public static bool SaveMapToDirectory(Beatmap beatmap, string folder)
     {
         try {
             if (!Directory.Exists(folder)) {
                 Directory.CreateDirectory(folder);
             }
 
-            string infoPath = Path.Combine(folder, "info.dat");
-            File.WriteAllText(infoPath, SaveSongInfoToString(songInfo));
+            string infoPath = Path.Combine(folder, "Info.dat");
+            File.WriteAllText(infoPath, SaveSongInfoToString(beatmap.SongData));
 
-            // Update map path for saving difficulties
-            songInfo.MapPath = folder;
-            SaveDifficulties(songInfo);
+            foreach (KeyValuePair<DifficultyInfo, DifficultyData> difficulty in beatmap.GetCachedDifficulties()) {
+                string path = Path.Combine(folder, difficulty.Key.BeatmapDataFilename);
+                string json = SaveDifficultyToString(difficulty.Value);
+                File.WriteAllText(path, json);
+            }
 
             return true;
         } catch (Exception ex) {
@@ -120,23 +146,6 @@ public static class BeatmapLoader
     /// <summary> Converts an AudioInfo object to a JSON string. </summary>
     public static string SaveAudioDataToString(AudioInfo audioInfo)
         => Serialize(audioInfo, new BeatmapAudioInfoSerializer());
-
-    /// <summary> Saves all difficulties for a given SongInfo object. </summary>
-    public static void SaveDifficulties(SongInfo songInfo)
-    {
-        try {
-            foreach (DifficultyInfo diffInfo in songInfo.DifficultyBeatmaps) {
-                if (diffInfo.DifficultyData == null) continue;
-
-                string path = Path.Combine(songInfo.MapPath, diffInfo.BeatmapDataFilename);
-                string json = SaveDifficultyToString(diffInfo.DifficultyData);
-                File.WriteAllText(path, json);
-            }
-        } catch (Exception ex) {
-            Trace.WriteLine($"Error saving difficulties: {ex.Message}");
-            return;
-        }
-    }
 
     /// <summary> Serializes an object to a JSON string with formatting and converters. </summary>
     private static string Serialize<T>(T obj, JsonConverter converter)
