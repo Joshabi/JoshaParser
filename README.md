@@ -1,4 +1,4 @@
-# JoshaParity-Refactor
+# JoshaParser
 
 **Beat Saber Map Parser**
 
