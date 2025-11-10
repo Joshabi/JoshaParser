@@ -1,4 +1,8 @@
 ﻿using JoshaParser.Data.Metadata;
+using JoshaParser.Parsers;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace JoshaParser.Utils;
 
@@ -24,6 +28,55 @@ public static class BeatmapUtils
 /// <summary> Extensions class for generic BeatmapData </summary>
 public static class BeatmapExtensions
 {
+    /// <summary>
+    /// Computes SHA1 hash of info.dat combined with difficulty files in the order listed in info.dat
+    /// </summary>
+    /// <returns>SHA1 hash as hex string, or empty string if it fails</returns>
+    public static string ComputeMapHash(this Beatmap beatmap) {
+        try {
+            if (string.IsNullOrEmpty(beatmap.SongData.MapPath))
+                return string.Empty;
+
+            string infoPath = Directory.GetFiles(beatmap.SongData.MapPath, "info.dat", SearchOption.TopDirectoryOnly)
+                               .FirstOrDefault();
+            if (infoPath == null)
+                return string.Empty;
+
+            using var sha1 = SHA1.Create();
+            byte[] infoBytes = File.ReadAllBytes(infoPath);
+            List<byte> combinedBytes = [.. infoBytes];
+
+            // Add difficulty files in the order they appear in info.dat
+            foreach (var difficulty in beatmap.SongData.DifficultyBeatmaps) {
+                if (string.IsNullOrEmpty(difficulty.BeatmapDataFilename))
+                    continue;
+
+                string difficultyPath = Path.Combine(beatmap.SongData.MapPath, difficulty.BeatmapDataFilename);
+                if (File.Exists(difficultyPath)) {
+                    byte[] difficultyBytes = File.ReadAllBytes(difficultyPath);
+                    combinedBytes.AddRange(difficultyBytes);
+                }
+            }
+
+            // Compute hash of combined content
+            byte[] hashBytes = sha1.ComputeHash([.. combinedBytes]);
+
+            // Convert to hex string
+            StringBuilder sb = new();
+            foreach (byte b in hashBytes) {
+                sb.Append(b.ToString("x2"));
+            }
+
+            string hash = sb.ToString();
+            beatmap.SongData.MapHash = hash;
+            return hash;
+        }
+        catch {
+            return string.Empty;
+        }
+    }
+
+
     /// <summary> Converts string to BeatmapRevision </summary>
     public static BeatmapRevision ToBeatmapRevision(this string revisionString)
     {

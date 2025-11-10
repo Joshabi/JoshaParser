@@ -1,10 +1,13 @@
 ﻿using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace JoshaParser.Data.Metadata;
 
 /// <summary> Parsed Song Info data </summary>
 public class SongInfo
 {
+    public string MapHash { get; set; } = string.Empty;
     public string MapPath { get; set; } = string.Empty;
     public BeatmapInfoRevision Version { get; set; } = BeatmapInfoRevision.Unknown;
     public string SongName { get; set; } = string.Empty;
