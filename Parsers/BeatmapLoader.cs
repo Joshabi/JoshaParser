@@ -1,5 +1,6 @@
 ﻿using JoshaParser.Data.Metadata;
 using JoshaParser.Serialize;
+using JoshaParser.Utils;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
@@ -81,6 +82,8 @@ public static class BeatmapLoader
 
             if (config.LoadAllDifficulties)
                 map.FetchAllDifficulties();
+
+            map.ComputeMapHash();
 
             return map;
         } catch (Exception ex) {

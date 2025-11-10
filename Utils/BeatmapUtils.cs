@@ -37,8 +37,8 @@ public static class BeatmapExtensions
             if (string.IsNullOrEmpty(beatmap.SongData.MapPath))
                 return string.Empty;
 
-            string infoPath = Directory.GetFiles(beatmap.SongData.MapPath, "info.dat", SearchOption.TopDirectoryOnly)
-                               .FirstOrDefault();
+            string infoPath = Directory.GetFiles(beatmap.SongData.MapPath, "*", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault(f => string.Equals(Path.GetFileName(f), "info.dat", StringComparison.OrdinalIgnoreCase));
             if (infoPath == null)
                 return string.Empty;
 
@@ -46,7 +46,7 @@ public static class BeatmapExtensions
             byte[] infoBytes = File.ReadAllBytes(infoPath);
             List<byte> combinedBytes = [.. infoBytes];
 
-            // Add difficulty files in the order they appear in info.dat
+            // Add difficulty files in order
             foreach (var difficulty in beatmap.SongData.DifficultyBeatmaps) {
                 if (string.IsNullOrEmpty(difficulty.BeatmapDataFilename))
                     continue;
