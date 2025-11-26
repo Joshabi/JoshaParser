@@ -1,4 +1,5 @@
-﻿using JoshaParser.Data.Metadata;
+﻿using JoshaParser.Data.Beatmap;
+using JoshaParser.Data.Metadata;
 using JoshaParser.Serialize;
 using JoshaParser.Utils;
 using Newtonsoft.Json;
@@ -23,8 +24,11 @@ public class Beatmap(SongInfo metadata, AudioInfo? audioData = null)
         if (!File.Exists(path)) return null;
         string json = File.ReadAllText(path);
         DifficultyData? loaded = BeatmapLoader.LoadDifficultyFromString(json);
-        if (loaded != null)
+        if (loaded != null) {
+            BPMContext context = AudioData?.ToBPMContext(SongData.Song.BPM, SongData.SongTimeOffset) ?? BPMContext.CreateBPMContext(SongData.Song.BPM, loaded.RawBPMEvents, SongData.SongTimeOffset);
+            loaded.CalculateBeatmapMS(context);
             _cache[difficultyInfo] = loaded;
+        }
         return loaded;
     }
 

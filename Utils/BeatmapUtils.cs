@@ -1,6 +1,6 @@
-﻿using JoshaParser.Data.Metadata;
+﻿using JoshaParser.Data.Beatmap;
+using JoshaParser.Data.Metadata;
 using JoshaParser.Parsers;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -23,6 +23,21 @@ public static class BeatmapUtils
 
     /// <summary> Calculates the Reaction Time (RT) based on JD and NJS </summary>
     public static float CalculateReactionTime(float njs, float jd) => Math.Abs(njs) < 0.001f ? 0f : jd / (njs * 2) * 1000;
+
+    /// <summary> Calculates and sets all BeatGridObject MS timings </summary>
+    public static void CalculateBeatmapMS(this DifficultyData data, BPMContext context) {
+        data.Notes.ForEach(n => n.MS = context.ToRealTime(n.B) * 1000);
+        data.Bombs.ForEach(b => b.MS = context.ToRealTime(b.B) * 1000);
+        data.Obstacles.ForEach(o => o.MS = context.ToRealTime(o.B) * 1000);
+        data.Arcs.ForEach(a => {
+            a.MS = context.ToRealTime(a.B) * 1000;
+            a.TMS = context.ToRealTime(a.TB) * 1000;
+        });
+        data.Chains.ForEach(c => {
+            c.MS = context.ToRealTime(c.B) * 1000;
+            c.TMS = context.ToRealTime(c.TB) * 1000;
+        });
+    }
 }
 
 /// <summary> Extensions class for generic BeatmapData </summary>
