@@ -8,11 +8,12 @@ using System.Diagnostics;
 namespace JoshaParser.Parsers;
 
 /// <summary> Represents a Beat Saber map with metadata and cache of loaded difficulties </summary>
-public class Beatmap(SongInfo metadata, AudioInfo? audioData = null)
+public class Beatmap(SongInfo metadata, AudioInfo? audioData = null, bool retainRawJSON = true)
 {
     public SongInfo SongData { get; } = metadata;
     public AudioInfo? AudioData { get; } = audioData;
     private readonly Dictionary<DifficultyInfo, DifficultyData> _cache = [];
+    private readonly bool _retainRawJSON = retainRawJSON;
 
     /// <summary> Lazy-loaded difficulty data for a specific difficulty </summary>
     public DifficultyData? FetchDifficulty(DifficultyInfo difficultyInfo)
@@ -22,7 +23,7 @@ public class Beatmap(SongInfo metadata, AudioInfo? audioData = null)
 
         string path = Path.Combine(SongData.MapPath, difficultyInfo.BeatmapDataFilename);
         if (!File.Exists(path)) return null;
-        DifficultyData? loaded = BeatmapLoader.LoadDifficultyFromFile(path);
+        DifficultyData? loaded = BeatmapLoader.LoadDifficultyFromFile(path, _retainRawJSON);
         if (loaded != null) {
             BPMContext context = AudioData?.ToBPMContext(SongData.Song.BPM, SongData.SongTimeOffset) ?? BPMContext.CreateBPMContext(SongData.Song.BPM, loaded.RawBPMEvents, SongData.SongTimeOffset);
             loaded.CalculateBeatmapMS(context);
@@ -38,6 +39,14 @@ public class Beatmap(SongInfo metadata, AudioInfo? audioData = null)
             FetchDifficulty(difficulty);
     }
 
+    /// <summary> Clears all cached JSON strings. </summary>
+    public void ClearRawJSON()
+    {
+        SongData.RawJSON = null;
+        foreach (var difficulty in _cache.Values)
+            difficulty.RawJSON = null;
+    }
+
     public IReadOnlyDictionary<DifficultyInfo, DifficultyData> GetCachedDifficulties() => _cache;
     public void ClearCache() => _cache.Clear();
 }
@@ -47,6 +56,8 @@ public class BeatmapLoaderConfig
 {
     public bool LoadAllDifficulties { get; set; } = true;
     public bool LoadLightshowData { get; set; } = true;
+    /// <summary> If true, retains the raw JSON string in memory for re-serialization or accessing unloaded properties. Set to false to reduce memory usage. </summary>
+    public bool RetainRawJSON { get; set; } = true;
 }
 
 /// <summary> Functionalities for loading and saving Beatmaps </summary>
@@ -70,7 +81,7 @@ public static class BeatmapLoader
                 return null;
             }
 
-            SongInfo? songInfo = DeserializeFromFile<SongInfo>(infoPath, new BeatmapInfoSerializer());
+            SongInfo? songInfo = DeserializeFromFile<SongInfo>(infoPath, new BeatmapInfoSerializer(config.RetainRawJSON));
             if (songInfo is null) {
                 Trace.WriteLine($"Failed to deserialize info.dat: {infoPath}");
                 return null;
@@ -81,7 +92,7 @@ public static class BeatmapLoader
             AudioInfo? audioInfo = File.Exists(audioPath)
                 ? DeserializeFromFile<AudioInfo>(audioPath, new BeatmapAudioInfoSerializer())
                 : null;
-            Beatmap map = new(songInfo, audioInfo);
+            Beatmap map = new(songInfo, audioInfo, config.RetainRawJSON);
 
             if (config.LoadAllDifficulties)
                 map.FetchAllDifficulties();
@@ -96,16 +107,16 @@ public static class BeatmapLoader
     }
 
     /// <summary> Loads a song info from a JSON string of the info.dat file. </summary>
-    public static SongInfo? LoadSongInfoFromString(string jsonString)
-        => Deserialize<SongInfo>(jsonString, new BeatmapInfoSerializer());
+    public static SongInfo? LoadSongInfoFromString(string jsonString, bool retainRawJSON = true)
+        => Deserialize<SongInfo>(jsonString, new BeatmapInfoSerializer(retainRawJSON));
 
     /// <summary> Loads a difficulty from a JSON string of the difficulty.dat file. </summary>
-    public static DifficultyData? LoadDifficultyFromString(string jsonString)
-        => Deserialize<DifficultyData>(jsonString, new BeatmapSerializer());
+    public static DifficultyData? LoadDifficultyFromString(string jsonString, bool retainRawJSON = true)
+        => Deserialize<DifficultyData>(jsonString, new BeatmapSerializer(retainRawJSON));
 
     /// <summary> Loads a difficulty directly from a file using streaming deserialization. </summary>
-    public static DifficultyData? LoadDifficultyFromFile(string filePath)
-        => DeserializeFromFile<DifficultyData>(filePath, new BeatmapSerializer());
+    public static DifficultyData? LoadDifficultyFromFile(string filePath, bool retainRawJSON = true)
+        => DeserializeFromFile<DifficultyData>(filePath, new BeatmapSerializer(retainRawJSON));
 
     /// <summary> Loads audio and BPM data from a JSON string of the audio.dat file. </summary>
     public static AudioInfo? LoadAudioDataFromString(string jsonString)

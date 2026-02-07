@@ -7,14 +7,18 @@ using System.Diagnostics;
 namespace JoshaParser.Serialize;
 
 /// <summary> Handles deserialization of Beatmap info.dat </summary>
-public class BeatmapInfoSerializer : JsonConverter<SongInfo>
+public class BeatmapInfoSerializer(bool retainRawJSON = true) : JsonConverter<SongInfo>
 {
+    private readonly bool _retainRawJSON = retainRawJSON;
+
     /// <summary> Handles reading difficulty.dat json </summary>
     public override SongInfo? ReadJson(JsonReader reader, Type objectType, SongInfo? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
         SongInfo data = new();
         JObject obj = JObject.Load(reader);
-        data.RawJSON = obj.ToString(Formatting.Indented);
+        
+        if (_retainRawJSON)
+            data.RawJSON = obj.ToString(Formatting.Indented);
 
         JToken version = obj["version"] ?? obj["_version"] ?? "";
         if (string.IsNullOrEmpty(version.ToString())) return null;

@@ -8,14 +8,18 @@ using System.Diagnostics;
 namespace JoshaParser.Serialize;
 
 /// <summary> Handles serialize and deserialize operations for Beatmap versions V2, V3, V4 </summary>
-public class BeatmapSerializer : JsonConverter<DifficultyData>
+public class BeatmapSerializer(bool retainRawJSON = true) : JsonConverter<DifficultyData>
 {
+    private readonly bool _retainRawJSON = retainRawJSON;
+
     /// <summary> Handles reading difficulty.dat json </summary>
     public override DifficultyData? ReadJson(JsonReader reader, Type objectType, DifficultyData? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
         DifficultyData data = new();
         JObject obj = JObject.Load(reader);
-        data.RawJSON = obj.ToString(Formatting.Indented);
+        
+        if (_retainRawJSON)
+            data.RawJSON = obj.ToString(Formatting.Indented);
 
         JToken version = obj["version"] ?? obj["_version"] ?? "";
         if (string.IsNullOrEmpty(version.ToString())) return null;
