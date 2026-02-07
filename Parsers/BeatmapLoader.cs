@@ -22,8 +22,7 @@ public class Beatmap(SongInfo metadata, AudioInfo? audioData = null)
 
         string path = Path.Combine(SongData.MapPath, difficultyInfo.BeatmapDataFilename);
         if (!File.Exists(path)) return null;
-        string json = File.ReadAllText(path);
-        DifficultyData? loaded = BeatmapLoader.LoadDifficultyFromString(json);
+        DifficultyData? loaded = BeatmapLoader.LoadDifficultyFromFile(path);
         if (loaded != null) {
             BPMContext context = AudioData?.ToBPMContext(SongData.Song.BPM, SongData.SongTimeOffset) ?? BPMContext.CreateBPMContext(SongData.Song.BPM, loaded.RawBPMEvents, SongData.SongTimeOffset);
             loaded.CalculateBeatmapMS(context);
@@ -71,7 +70,7 @@ public static class BeatmapLoader
                 return null;
             }
 
-            SongInfo? songInfo = Deserialize<SongInfo>(File.ReadAllText(infoPath), new BeatmapInfoSerializer());
+            SongInfo? songInfo = DeserializeFromFile<SongInfo>(infoPath, new BeatmapInfoSerializer());
             if (songInfo is null) {
                 Trace.WriteLine($"Failed to deserialize info.dat: {infoPath}");
                 return null;
@@ -80,7 +79,7 @@ public static class BeatmapLoader
             songInfo.MapPath = folder;
             string audioPath = Path.Combine(folder, songInfo.Song.AudioDataFilename);
             AudioInfo? audioInfo = File.Exists(audioPath)
-                ? LoadAudioDataFromString(File.ReadAllText(audioPath))
+                ? DeserializeFromFile<AudioInfo>(audioPath, new BeatmapAudioInfoSerializer())
                 : null;
             Beatmap map = new(songInfo, audioInfo);
 
@@ -104,6 +103,10 @@ public static class BeatmapLoader
     public static DifficultyData? LoadDifficultyFromString(string jsonString)
         => Deserialize<DifficultyData>(jsonString, new BeatmapSerializer());
 
+    /// <summary> Loads a difficulty directly from a file using streaming deserialization. </summary>
+    public static DifficultyData? LoadDifficultyFromFile(string filePath)
+        => DeserializeFromFile<DifficultyData>(filePath, new BeatmapSerializer());
+
     /// <summary> Loads audio and BPM data from a JSON string of the audio.dat file. </summary>
     public static AudioInfo? LoadAudioDataFromString(string jsonString)
         => Deserialize<AudioInfo>(jsonString, new BeatmapAudioInfoSerializer());
@@ -112,6 +115,22 @@ public static class BeatmapLoader
     {
         try {
             return JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings { Converters = { converter } });
+        } catch (JsonException ex) {
+            Trace.WriteLine($"JSON Deserialization error: {ex.Message}");
+            return default;
+        }
+    }
+
+    /// <summary> Deserializes directly from a file stream to reduce memory allocations. </summary>
+    private static T? DeserializeFromFile<T>(string filePath, JsonConverter converter)
+    {
+        try {
+            using var fileStream = File.OpenRead(filePath);
+            using var streamReader = new StreamReader(fileStream);
+            using var jsonReader = new JsonTextReader(streamReader);
+            var serializer = new JsonSerializer();
+            serializer.Converters.Add(converter);
+            return serializer.Deserialize<T>(jsonReader);
         } catch (JsonException ex) {
             Trace.WriteLine($"JSON Deserialization error: {ex.Message}");
             return default;

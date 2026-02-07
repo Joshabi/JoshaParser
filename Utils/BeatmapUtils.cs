@@ -43,6 +43,8 @@ public static class BeatmapUtils
 /// <summary> Extensions class for generic BeatmapData </summary>
 public static class BeatmapExtensions
 {
+    private const int HashBufferSize = 81920; // 80KB buffer for streaming
+
     /// <summary>
     /// Computes SHA1 hash of info.dat combined with difficulty files in the order listed in info.dat
     /// </summary>
@@ -58,26 +60,31 @@ public static class BeatmapExtensions
                 return string.Empty;
 
             using var sha1 = SHA1.Create();
-            byte[] infoBytes = File.ReadAllBytes(infoPath);
-            List<byte> combinedBytes = [.. infoBytes];
+            byte[] buffer = new byte[HashBufferSize];
 
-            // Add difficulty files in order
+            // Stream info.dat through hash
+            using (var stream = File.OpenRead(infoPath)) {
+                StreamToHash(sha1, stream, buffer);
+            }
+
+            // Stream difficulty files in order
             foreach (var difficulty in beatmap.SongData.DifficultyBeatmaps) {
                 if (string.IsNullOrEmpty(difficulty.BeatmapDataFilename))
                     continue;
 
                 string difficultyPath = Path.Combine(beatmap.SongData.MapPath, difficulty.BeatmapDataFilename);
                 if (File.Exists(difficultyPath)) {
-                    byte[] difficultyBytes = File.ReadAllBytes(difficultyPath);
-                    combinedBytes.AddRange(difficultyBytes);
+                    using var stream = File.OpenRead(difficultyPath);
+                    StreamToHash(sha1, stream, buffer);
                 }
             }
 
-            // Compute hash of combined content
-            byte[] hashBytes = sha1.ComputeHash([.. combinedBytes]);
+            // Finalize hash computation
+            sha1.TransformFinalBlock([], 0, 0);
+            byte[] hashBytes = sha1.Hash;
 
             // Convert to hex string
-            StringBuilder sb = new();
+            StringBuilder sb = new(hashBytes.Length * 2);
             foreach (byte b in hashBytes) {
                 sb.Append(b.ToString("x2"));
             }
@@ -91,6 +98,13 @@ public static class BeatmapExtensions
         }
     }
 
+    /// <summary> Streams file content through SHA1 hash computation </summary>
+    private static void StreamToHash(SHA1 sha1, FileStream stream, byte[] buffer) {
+        int bytesRead;
+        while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0) {
+            sha1.TransformBlock(buffer, 0, bytesRead, null, 0);
+        }
+    }
 
     /// <summary> Converts string to BeatmapRevision </summary>
     public static BeatmapRevision ToBeatmapRevision(this string revisionString)
